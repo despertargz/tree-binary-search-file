@@ -1,6 +1,8 @@
 package Tree::Binary::Search::File;
 
 my $KEY_SIZE = 50;
+
+#left_pos, right_pos, val_length all 4 byte integers
 my $HEADER_SIZE = 4 + 4 + 4 + $KEY_SIZE;
 
 sub new {
@@ -24,6 +26,7 @@ sub write_file {
 
     my $tree = $self->build_tree($hash_list);
     $tree->{pos} = 0;
+
     $self->add_to_list($tree);
     $self->_write_file();
 }
@@ -161,6 +164,7 @@ sub build_tree {
             val => $list->[0]->{val},
             val_length => length($list->[0]->{val}),
         };
+        $self->{_cur_pos} += $HEADER_SIZE + $tree->{val_length};
         return $tree;
     }
 
@@ -172,6 +176,7 @@ sub build_tree {
     };
 
     $self->{_cur_pos} += $HEADER_SIZE + $tree->{val_length};
+    $self->{_val_pos} += $tree->{val_length};
     $tree->{left_position} = $self->{_cur_pos};
 
     my $left_end = $mid-1;
@@ -179,15 +184,15 @@ sub build_tree {
     $tree->{left} = $self->build_tree(\@left);
     $tree->{left}->{pos} = $tree->{left_position};
 
-    if ($left_end > 0) {
+    if ($size > 2) {
         my $right_start = $mid+1;
         my $right_end = $size-1;
         my @right = @{$list}[$right_start..$right_end];
         $tree->{right} = $self->build_tree(\@right);
 
-        $self->{_cur_pos} += $HEADER_SIZE + $tree->{right}->{val_length} if $tree->{right};
-        $tree->{right_position} = $self->{_cur_pos} if $tree->{right};
+        $tree->{right_position} = $self->{_cur_pos};
         $tree->{right}->{pos} = $tree->{right_position};
+        $self->{_cur_pos} += $HEADER_SIZE + $tree->{right}->{val_length};
     }
 
     if ($tree->{left}) {
