@@ -10,7 +10,7 @@ use Test::More;
 
 #autoflush STDOUT 1;
 
-my $final = 10; 
+my $final = 1000; 
 for (1..$final) {
     build_hash($_);
 }
@@ -41,11 +41,8 @@ sub build_hash {
 
     my $hash = {};
     foreach (1..$n) {
-        my $padding = '';
         my $r = rand(10);
-        #my $padding = "_" x ($r + 1);
-        $padding = "_" x $n;
-        say $padding;
+        my $padding = "_" x ($r + 1);
         $hash->{"Key$_"} = $padding . "Value$_";
     }
 
@@ -54,7 +51,6 @@ sub build_hash {
 
     $bft = Tree::Binary::Search::File->new("/tmp/test_bst-$n");
     foreach (1..$n) {
-        print "on $n\n";
         my $v = $bft->get("Key$_");
         my $m = $v =~ /Value$_/;
         ok $m, 'match ' . $_ . ' of ' . $n;
